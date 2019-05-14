@@ -526,10 +526,10 @@
   </build>
 
   <pluginRepositories>
-    <pluginRepository>
+    <!--<pluginRepository>
       <id>onejar-maven-plugin.googlecode.com</id>
       <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
-    </pluginRepository>
+    </pluginRepository>-->
     <pluginRepository>
       <id>scala-tools.org</id>
       <name>Scala-tools Maven2 Repository</name>
