@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import org.apache.drill.common.types.TypeProtos;
 import org.apache.drill.common.types.Types;
 import org.apache.drill.exec.ExecConstants;
+import org.apache.drill.exec.client.QuerySubmitter;
 import org.apache.drill.exec.memory.RootAllocator;
 import org.apache.drill.exec.physical.impl.xsort.managed.ExternalSortBatch;
 import org.apache.drill.exec.planner.physical.PlannerSettings;
@@ -42,6 +43,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import ch.qos.logback.classic.Level;
+import org.junit.runner.Description;
 
 /**
  * Example test case using the Drill cluster fixture. Your test case
@@ -88,7 +90,7 @@ public class ExampleTest {
   public void firstTest() throws Exception {
     try (ClusterFixture cluster = ClusterFixture.standardCluster(dirTestWatcher);
          ClientFixture client = cluster.clientFixture()) {
-      client.queryBuilder().sql("SELECT * FROM `cp`.`employee.json` LIMIT 10").printCsv();
+      client.queryBuilder().sql("SELECT * FROM `cp`.`employee.json` LIMIT 10").print(QuerySubmitter.Format.TABLE);
     }
   }
 
@@ -133,13 +135,13 @@ public class ExampleTest {
       ClusterFixtureBuilder builder = ClusterFixture.builder(dirTestWatcher).configProperty(ExecConstants.SLICE_TARGET, 10);
 
       try (ClusterFixture cluster = builder.build(); ClientFixture client = cluster.clientFixture()) {
-        String sql = "SELECT * FROM `dfs`.`test/employee.json`";
+        String sql = "SELECT * FROM `mock`.`test/example-mock.json`";
         System.out.println(client.queryBuilder().sql(sql).explainJson());
         QuerySummary results = client.queryBuilder().sql(sql).run();
         System.out.println(String.format("Read %d rows", results.recordCount()));
         // Usually we want to test something. Here, just test that we got
         // the 2 records.
-        assertEquals(2, results.recordCount());
+        assertEquals(20, results.recordCount());
       }
     }
   }
@@ -268,9 +270,12 @@ public class ExampleTest {
    *
    * @param args not used
    */
-  public static void main(String args) {
+  public static void main(String[] args) {
     try {
-      new ExampleTest().firstTest();
+      ExampleTest test = new ExampleTest();
+      Description description = Description.createTestDescription(ExampleTest.class, "main");
+      test.dirTestWatcher.starting(description);
+      test.firstTest();
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

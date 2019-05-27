@@ -120,6 +120,11 @@
     </repository>
 
     <repository>
+    <id>cloudera</id>
+    <url>https://repository.cloudera.com/artifactory/cdh-releases-rcs</url>
+  </repository>
+
+    <repository>
       <id>mapr-releases</id>
       <url>http://repository.mapr.com/maven/</url>
       <releases>
