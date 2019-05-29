@@ -17,13 +17,11 @@
  */
 package org.apache.drill.exec.planner.sql;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.calcite.adapter.java.JavaTypeFactory;
-import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
 import org.apache.calcite.plan.ConventionTraitDef;
 import org.apache.calcite.plan.RelOptCluster;
@@ -68,9 +66,9 @@ import org.apache.drill.exec.planner.physical.DrillDistributionTraitDef;
 import org.apache.drill.exec.planner.physical.PlannerSettings;
 import org.apache.drill.exec.rpc.user.UserSession;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Class responsible for managing parsing, validation and toRel conversion for sql statements.
@@ -174,7 +172,7 @@ public class SqlConverter {
     } catch (RuntimeException e) {
       UserException.Builder builder = UserException
           .validationError(e)
-          .addContext("SQL Query", sql);
+          .addContext("SQL Query", parsedNode.toString());
       if (isInnerQuery) {
         builder.message("Failure validating a view your query is dependent upon.");
       }
@@ -338,6 +336,7 @@ public class SqlConverter {
 
     @Override
     public boolean isConvertTableAccess() {
+      //TODO need to confirm
       return false;
     }
 
