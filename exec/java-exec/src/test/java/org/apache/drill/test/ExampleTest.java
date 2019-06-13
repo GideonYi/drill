@@ -18,40 +18,27 @@
 package org.apache.drill.test;
 
 import ch.qos.logback.classic.Level;
-import com.google.common.io.Resources;
 import org.apache.drill.common.types.TypeProtos;
 import org.apache.drill.common.types.Types;
 import org.apache.drill.exec.ExecConstants;
-import org.apache.drill.exec.client.QuerySubmitter;
 import org.apache.drill.exec.memory.RootAllocator;
 import org.apache.drill.exec.physical.impl.xsort.managed.ExternalSortBatch;
 import org.apache.drill.exec.planner.physical.PlannerSettings;
 import org.apache.drill.exec.record.BatchSchema;
-import org.apache.drill.exec.server.Drillbit;
-import org.apache.drill.exec.server.DrillbitContext;
-import org.apache.drill.exec.store.MemoryFileSystem;
-import org.apache.drill.exec.store.StoragePlugin;
-import org.apache.drill.exec.store.dfs.FileSystemPlugin;
 import org.apache.drill.test.LogFixture.LogFixtureBuilder;
 import org.apache.drill.test.QueryBuilder.QuerySummary;
 import org.apache.drill.test.rowSet.RowSet;
 import org.apache.drill.test.rowSet.RowSetBuilder;
 import org.apache.drill.test.rowSet.SchemaBuilder;
 import org.apache.drill.test.rowSet.file.JsonFileBuilder;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.Description;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -101,8 +88,7 @@ public class ExampleTest {
   public void firstTest() throws Exception {
     try (ClusterFixture cluster = ClusterFixture.standardCluster(dirTestWatcher);
          ClientFixture client = cluster.clientFixture()) {
-      QueryBuilder sql = client.queryBuilder().sql("SELECT * FROM `memory`.`user/employee22.json` LIMIT 10");
-      sql.print(QuerySubmitter.Format.TABLE);
+      client.queryBuilder().sql("SELECT * FROM `cp`.`employee.json` LIMIT 10").printCsv();
     }
   }
 
@@ -147,13 +133,13 @@ public class ExampleTest {
       ClusterFixtureBuilder builder = ClusterFixture.builder(dirTestWatcher).configProperty(ExecConstants.SLICE_TARGET, 10);
 
       try (ClusterFixture cluster = builder.build(); ClientFixture client = cluster.clientFixture()) {
-        String sql = "SELECT * FROM `memory`.`user/employee22.json`";
+        String sql = "SELECT * FROM `dfs`.`test/employee.json`";
         System.out.println(client.queryBuilder().sql(sql).explainJson());
         QuerySummary results = client.queryBuilder().sql(sql).run();
         System.out.println(String.format("Read %d rows", results.recordCount()));
         // Usually we want to test something. Here, just test that we got
         // the 2 records.
-//        assertEquals(20, results.recordCount());
+        assertEquals(2, results.recordCount());
       }
     }
   }
@@ -282,40 +268,11 @@ public class ExampleTest {
    *
    * @param args not used
    */
-  public static void main(String[] args) {
+  public static void main(String args) {
     try {
-
-      ExampleTest test = new ExampleTest();
-      Description description = Description.createTestDescription(ExampleTest.class, "main");
-      test.dirTestWatcher.starting(description);
-
-      ClusterFixture cluster = ClusterFixture.standardCluster(test.dirTestWatcher);
-      Drillbit drillbit = cluster.drillbit();
-      DrillbitContext context = drillbit.getContext();
-      StoragePlugin memory = context.getStorage().getPlugin("memory");
-      FileSystemPlugin memoryPlugin = FileSystemPlugin.class.cast(memory);
-      Configuration memoryFsConf = memoryPlugin.getFsConf();
-
-
-
-      String tableName = "user/employee22.json";
-//      String tableObj = Resources.toString(Resources.getResource("employee.json"), Charset.defaultCharset());
-      String tableObj = Resources.toString(Resources.getResource("test_simple_date.json"), Charset.defaultCharset());
-      String sql = String.format("SELECT * FROM `memory`.`%s` LIMIT 10", tableName);
-      HashMap<String, Object> map = new HashMap<>();
-      map.put(tableName, tableObj);
-
-      FileSystem fileSystem = FileSystem.get(new URI("memory:///"), memoryFsConf);
-      MemoryFileSystem memoryFileSystem = MemoryFileSystem.class.cast(fileSystem);
-      memoryFileSystem.setMap(map);
-
-      ClientFixture client = cluster.clientFixture();
-      client.queryBuilder().sql(sql).print(QuerySubmitter.Format.TABLE);
-
-      client.close();
-      cluster.close();
-
+      new ExampleTest().firstTest();
     } catch (Exception e) {
+      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }

@@ -71,7 +71,6 @@ public class FileSystemPlugin extends AbstractStoragePlugin {
       }
       fsConf.set(FileSystem.FS_DEFAULT_NAME_KEY, config.connection);
       fsConf.set("fs.classpath.impl", ClassPathFileSystem.class.getName());
-      fsConf.set("fs.memory.impl", MemoryFileSystem.class.getName());
       fsConf.set("fs.drill-local.impl", LocalSyncableFileSystem.class.getName());
 
       formatCreator = newFormatCreator(config, context, fsConf);

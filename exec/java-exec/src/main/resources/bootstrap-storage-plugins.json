@@ -149,20 +149,6 @@
           extractHeader: true
         }
       }
-    },
-
-    memory: {
-      type: "file",
-      connection: "memory:///",
-      formats: {
-        "json" : {
-          type: "json",
-          extensions: [ "json" ]
-        },
-        "parquet" : {
-          type: "parquet"
-        }
-      }
     }
   }
 }
